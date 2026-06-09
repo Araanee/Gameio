@@ -1,0 +1,175 @@
+@if (gameToDelete) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-icon">🗑️</div>
+      <h3>Supprimer ce jeu ?</h3>
+      <p>Voulez-vous vraiment supprimer <strong>{{ gameToDelete.title }}</strong> ? Cette action est irréversible.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button class="btn-reject" (click)="delete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (userToDelete) {
+  <div class="modal-overlay" (click)="cancelDeleteUser()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-icon">👤</div>
+      <h3>Supprimer cet utilisateur ?</h3>
+      <p>Voulez-vous vraiment supprimer <strong>{{ userToDelete.username }}</strong> ? Cette action est irréversible.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelDeleteUser()">Annuler</button>
+        <button class="btn-reject" (click)="deleteUser()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="admin-page">
+  <div class="admin-header">
+    <a routerLink="/" class="btn-back">← Retour</a>
+    <h1>Administration</h1>
+    @if (message) {
+      <div class="msg">{{ message }}</div>
+    }
+  </div>
+
+  <div class="admin-grid">
+
+    <!-- COLONNE GAUCHE : Gestion des jeux -->
+    <div class="admin-col">
+      <div class="col-header">
+        <span class="col-icon">🎲</span>
+        <h2>Gestion des jeux</h2>
+      </div>
+
+
+<h3 class="section-title">En attente de validation</h3>
+      @if (loading) { <p class="empty">Chargement...</p> }
+      @if (!loading && pendingGames.length === 0) {
+        <p class="empty">Aucun jeu en attente.</p>
+      }
+      <div class="game-list">
+        @for (game of pendingGames; track game.id) {
+          <div class="game-row">
+            <img [src]="game.imageUrl || 'assets/placeholder.png'" [alt]="game.title" />
+            <div class="game-info">
+              <h3>{{ game.title }}</h3>
+              <p>📅 {{ game.year }} &nbsp; 👥 {{ game.minPlayers }}–{{ game.maxPlayers }}</p>
+              <p class="desc">{{ game.description }}</p>
+            </div>
+            <div class="actions">
+              <button class="btn-approve" (click)="approve(game)">✅ Approuver</button>
+              <button class="btn-reject" (click)="reject(game)">❌ Rejeter</button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <h3 class="section-title" style="margin-top:1.5rem">Jeux approuvés</h3>
+      @if (approvedGames.length === 0) {
+        <p class="empty">Aucun jeu approuvé.</p>
+      }
+      <div class="game-list">
+        @for (game of approvedGames; track game.id) {
+          @if (editingGame?.id === game.id) {
+            <div class="game-row edit-row">
+              <div class="edit-form">
+                <input [(ngModel)]="editingGame!.title" placeholder="Titre" />
+                <input [(ngModel)]="editingGame!.year" type="number" placeholder="Année" />
+                <input [(ngModel)]="editingGame!.minPlayers" type="number" placeholder="Joueurs min" />
+                <input [(ngModel)]="editingGame!.maxPlayers" type="number" placeholder="Joueurs max" />
+                <input [(ngModel)]="editingGame!.imageUrl" placeholder="URL image" />
+                <textarea [(ngModel)]="editingGame!.description" placeholder="Description" rows="2"></textarea>
+              </div>
+              <div class="actions">
+                <button class="btn-approve" (click)="saveEdit()">💾 Sauvegarder</button>
+                <button class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+              </div>
+            </div>
+          } @else {
+            <div class="game-row">
+              <img [src]="game.imageUrl || 'assets/placeholder.png'" [alt]="game.title" />
+              <div class="game-info">
+                <h3>{{ game.title }}</h3>
+                <p>📅 {{ game.year }} &nbsp; 👥 {{ game.minPlayers }}–{{ game.maxPlayers }}</p>
+                <p class="desc">{{ game.description }}</p>
+              </div>
+              <div class="actions">
+                <button class="btn-edit" (click)="startEdit(game)">✏️ Modifier</button>
+                <button class="btn-reject" (click)="confirmDelete(game)">🗑️ Supprimer</button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- COLONNE DROITE : Gestion des utilisateurs -->
+    <div class="admin-col">
+      <div class="col-header">
+        <span class="col-icon">👥</span>
+        <h2>Gestion des utilisateurs</h2>
+      </div>
+
+      <div class="user-toolbar">
+        <button class="btn-add-user" (click)="openUserForm()">+ Ajouter un utilisateur</button>
+      </div>
+
+      @if (showUserForm) {
+        <div class="user-form-card">
+          <h3>Nouvel utilisateur</h3>
+          <div class="user-form-fields">
+            <input [(ngModel)]="newUser.username" placeholder="Nom d'utilisateur" />
+            <input [(ngModel)]="newUser.password" type="password" placeholder="Mot de passe" />
+            <select [(ngModel)]="newUser.role">
+              @for (r of roles; track r) {
+                <option [value]="r">{{ roleLabel(r) }}</option>
+              }
+            </select>
+          </div>
+          <div class="user-form-actions">
+            <button class="btn-approve" (click)="createUser()">Créer</button>
+            <button class="btn-cancel" (click)="cancelUserForm()">Annuler</button>
+          </div>
+        </div>
+      }
+
+      <div class="user-list">
+        @for (user of users; track user.id) {
+          @if (editingUser?.id === user.id) {
+            <div class="user-row edit-row">
+              <div class="edit-form">
+                <input [(ngModel)]="editingUser!.username" placeholder="Nom d'utilisateur" [disabled]="true" />
+                <input [(ngModel)]="editingUser!.password" type="password" placeholder="Nouveau mot de passe (optionnel)" />
+                <select [(ngModel)]="editingUser!.role">
+                  @for (r of roles; track r) {
+                    <option [value]="r">{{ roleLabel(r) }}</option>
+                  }
+                </select>
+              </div>
+              <div class="actions">
+                <button class="btn-approve" (click)="saveEditUser()">💾 Sauvegarder</button>
+                <button class="btn-cancel" (click)="cancelEditUser()">Annuler</button>
+              </div>
+            </div>
+          } @else {
+            <div class="user-row">
+              <div class="user-avatar">{{ user.username[0].toUpperCase() }}</div>
+              <div class="user-info">
+                <span class="user-name">{{ user.username }}</span>
+                <span class="user-role-badge" [class]="'role-' + user.role.toLowerCase()">{{ roleLabel(user.role) }}</span>
+              </div>
+              <div class="actions">
+                <button class="btn-edit" (click)="startEditUser(user)">✏️ Modifier</button>
+                <button class="btn-reject" (click)="confirmDeleteUser(user)">🗑️ Supprimer</button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+  </div>
+</div>

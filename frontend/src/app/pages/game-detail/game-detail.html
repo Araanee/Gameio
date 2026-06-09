@@ -1,0 +1,148 @@
+<div class="container">
+  <nav class="breadcrumb">
+    <a routerLink="/">Accueil</a>
+    <span class="sep">›</span>
+    <a routerLink="/">Catalogue</a>
+    @if (game) {
+      <span class="sep">›</span>
+      <span class="current">{{ game.title }}</span>
+    }
+  </nav>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement...</p>
+    </div>
+  }
+
+  @if (game) {
+    <div class="detail-card">
+
+      <div class="detail-header">
+        <div class="image-col">
+          <img [src]="game.imageUrl || 'assets/placeholder.png'" [alt]="game.title" />
+          @if (game.genre) {
+            <span class="genre-badge">{{ game.genre }}</span>
+          }
+        </div>
+
+        <div class="info-col">
+          <h1>{{ game.title }}</h1>
+
+          <div class="rating-hero">
+            <span class="star-big">★</span>
+            <span class="rating-num">{{ game.averageRating | number:'1.1-1' }}</span>
+            <span class="rating-denom">/ 5</span>
+            <span class="rating-count">({{ ratings.length }} avis)</span>
+          </div>
+
+          <div class="badges">
+            <div class="badge">
+              <span class="badge-icon">👥</span>
+              <span class="badge-label">{{ game.minPlayers }}–{{ game.maxPlayers }} joueurs</span>
+            </div>
+            <div class="badge">
+              <span class="badge-icon">📅</span>
+              <span class="badge-label">{{ game.year }}</span>
+            </div>
+            @if (game.genre) {
+              <div class="badge">
+                <span class="badge-icon">🎭</span>
+                <span class="badge-label">{{ game.genre }}</span>
+              </div>
+            }
+          </div>
+
+          @if (game.description) {
+            <div class="description-block">
+              <h3>Description</h3>
+              <p>{{ game.description }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (ratings.length > 0) {
+        <div class="ratings-section">
+          <h2>Avis des joueurs <span class="ratings-count">({{ ratings.length }})</span></h2>
+          <div class="rating-distribution">
+            @for (star of [5,4,3,2,1]; track star) {
+              <div class="dist-row">
+                <span class="dist-label">{{ star }} ⭐</span>
+                <div class="dist-bar-wrap">
+                  <div class="dist-bar" [style.width.%]="ratingPercent(star)"></div>
+                </div>
+                <span class="dist-count">{{ ratingCount(star) }}</span>
+              </div>
+            }
+          </div>
+          @for (r of ratings; track r.id) {
+            <div class="rating-item">
+              @if (editingRating?.id === r.id) {
+                <div class="rating-edit-form">
+                  <select [(ngModel)]="editingRating!.score">
+                    <option [value]="1">⭐ 1</option>
+                    <option [value]="2">⭐⭐ 2</option>
+                    <option [value]="3">⭐⭐⭐ 3</option>
+                    <option [value]="4">⭐⭐⭐⭐ 4</option>
+                    <option [value]="5">⭐⭐⭐⭐⭐ 5</option>
+                  </select>
+                  <textarea [(ngModel)]="editingRating!.comment" rows="2" placeholder="Votre avis..."></textarea>
+                  <div class="rating-edit-actions">
+                    <button class="btn-save" (click)="saveEditRating()">Sauvegarder</button>
+                    <button class="btn-cancel" (click)="cancelEditRating()">Annuler</button>
+                  </div>
+                </div>
+              } @else {
+                <div class="rating-header">
+                  <span class="rating-user">👤 {{ r.userId }}</span>
+                  <span class="rating-score">{{ '⭐'.repeat(r.score) }} {{ r.score }}/5</span>
+                  @if (isOwnRating(r)) {
+                    <div class="rating-actions">
+                      <button class="btn-edit-rating" (click)="startEditRating(r)">✏️</button>
+                      <button class="btn-delete-rating" (click)="deleteRating(r)">🗑️</button>
+                    </div>
+                  }
+                </div>
+                @if (r.comment) {
+                  <p class="rating-comment">{{ r.comment }}</p>
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <div class="rating-form">
+        <h2>Noter ce jeu</h2>
+        @if (!authService.isLoggedIn()) {
+          <div class="info-msg">
+            🔒 <a routerLink="/login">Connectez-vous</a> pour noter ce jeu.
+          </div>
+        } @else if (ratingSubmitted) {
+          <div class="success">✅ Merci pour votre note !</div>
+        } @else {
+          @if (ratingError) {
+            <div class="error-msg">{{ ratingError }}</div>
+          }
+          <div class="form-group">
+            <label>Note (1 à 5)</label>
+            <select [(ngModel)]="newRating.score">
+              <option [value]="1">⭐ 1</option>
+              <option [value]="2">⭐⭐ 2</option>
+              <option [value]="3">⭐⭐⭐ 3</option>
+              <option [value]="4">⭐⭐⭐⭐ 4</option>
+              <option [value]="5">⭐⭐⭐⭐⭐ 5</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Commentaire (optionnel)</label>
+            <textarea [(ngModel)]="newRating.comment" placeholder="Votre avis..." rows="3"></textarea>
+          </div>
+          <button (click)="submitRating()" class="btn-submit">Envoyer ma note</button>
+        }
+      </div>
+    </div>
+  }
+</div>

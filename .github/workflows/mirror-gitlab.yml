@@ -1,0 +1,29 @@
+name: Mirror to GitLab
+
+# Pousse main + tags vers le dépôt GitLab (le rendu) à chaque push.
+# Secrets à créer dans GitHub (Settings → Secrets and variables → Actions) :
+#   - GITLAB_REPO  : chemin sans https://, ex. gitlab.com/mon-groupe/gameio.git
+#   - GITLAB_TOKEN : Project/Personal Access Token GitLab avec scope write_repository
+on:
+  push:
+    branches: [ main ]
+    tags: [ '*' ]
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # historique complet pour un push cohérent
+
+      - name: Push vers GitLab
+        env:
+          GITLAB_REPO: ${{ secrets.GITLAB_REPO }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          git push --force "https://oauth2:${GITLAB_TOKEN}@${GITLAB_REPO}" \
+            "HEAD:refs/heads/main" --tags

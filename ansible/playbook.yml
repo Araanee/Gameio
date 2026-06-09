@@ -1,0 +1,9 @@
+---
+# Provisionne l'EC2 monitoring : agent CloudWatch + Grafana.
+# Squelette J-plus-tard — les rôles seront étoffés au palier monitoring.
+- name: Configurer l'EC2 monitoring
+  hosts: monitoring
+  become: true
+  roles:
+    - cloudwatch_agent
+    - grafana

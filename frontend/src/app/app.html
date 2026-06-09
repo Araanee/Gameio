@@ -1,0 +1,67 @@
+<nav class="navbar">
+  <a routerLink="/" class="nav-brand">🎲 GameBoard</a>
+
+  <div class="nav-links">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Catalogue ▾</button>
+      <div class="nav-dropdown-menu">
+        <a routerLink="/" [queryParams]="{genre: 'Stratégie'}" class="dropdown-item">Stratégie</a>
+        <a routerLink="/" [queryParams]="{genre: 'Famille'}" class="dropdown-item">Famille</a>
+        <a routerLink="/" [queryParams]="{genre: 'Coopératif'}" class="dropdown-item">Coopératif</a>
+        <a routerLink="/" [queryParams]="{genre: 'Gestion'}" class="dropdown-item">Gestion</a>
+        <a routerLink="/" [queryParams]="{genre: 'Abstrait'}" class="dropdown-item">Abstrait</a>
+        <a routerLink="/" [queryParams]="{genre: 'Horreur'}" class="dropdown-item">Horreur</a>
+        <a routerLink="/" [queryParams]="{genre: 'Cartes'}" class="dropdown-item">Cartes</a>
+        <a routerLink="/" [queryParams]="{genre: 'Ambiance'}" class="dropdown-item">Ambiance</a>
+        <div class="dropdown-divider"></div>
+        <a routerLink="/" class="dropdown-item dropdown-all">Voir tout le catalogue →</a>
+      </div>
+    </div>
+
+    @if (isLoggedIn() && (hasRole('EDITOR') || hasRole('WEBMASTER'))) {
+      <a routerLink="/propose">Proposer</a>
+      <a routerLink="/my-proposals">Mes propositions</a>
+    }
+    @if (hasRole('WEBMASTER')) {
+      <a routerLink="/admin">Admin</a>
+    }
+    @if (isLoggedIn()) {
+      <span class="nav-user">👤 {{ getUsername() }}</span>
+      <button (click)="logout()" class="btn-nav btn-logout">Déconnexion</button>
+    } @else {
+      <a routerLink="/register" class="btn-nav">S'inscrire</a>
+      <a routerLink="/login" class="btn-nav">Connexion</a>
+    }
+  </div>
+</nav>
+
+<router-outlet />
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-logo">🎲 GameBoard</span>
+      <p>La plateforme communautaire de notation de jeux de société.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navigation</h4>
+      <a routerLink="/">Catalogue</a>
+      <a routerLink="/login">Connexion</a>
+    </div>
+    <div class="footer-col">
+      <h4>Genres</h4>
+      <a routerLink="/" [queryParams]="{genre: 'Stratégie'}">Stratégie</a>
+      <a routerLink="/" [queryParams]="{genre: 'Famille'}">Famille</a>
+      <a routerLink="/" [queryParams]="{genre: 'Coopératif'}">Coopératif</a>
+      <a routerLink="/" [queryParams]="{genre: 'Ambiance'}">Ambiance</a>
+    </div>
+    <div class="footer-col">
+      <h4>Projet</h4>
+      <p>EPITA S8 — APC</p>
+      <p>Équipe GameBoard</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 GameBoard — Projet EPITA S8 APC</span>
+  </div>
+</footer>

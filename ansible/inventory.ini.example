@@ -1,0 +1,4 @@
+# Copier en inventory.ini et remplacer par l'IP publique de l'EC2 monitoring
+# (sortie Terraform). NE PAS committer inventory.ini avec une IP réelle.
+[monitoring]
+ec2-monitoring ansible_host=REMPLACER_PAR_IP_PUBLIQUE

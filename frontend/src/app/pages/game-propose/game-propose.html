@@ -1,0 +1,64 @@
+<div class="container">
+  <a routerLink="/" class="btn-back">← Retour à la liste</a>
+
+  <h1>🎲 Proposer un jeu</h1>
+  <p class="subtitle">Remplissez le formulaire ci-dessous. Votre proposition sera examinée par un modérateur.</p>
+
+  @if (!authService.isLoggedIn()) {
+    <div class="info-msg">
+      🔒 <a routerLink="/login">Connectez-vous</a> pour proposer un jeu.
+    </div>
+  } @else if (!canPropose()) {
+    <div class="info-msg">
+      ⛔ Seuls les éditeurs et webmasters peuvent proposer un jeu.
+    </div>
+  } @else if (submitted) {
+    <div class="success">
+      ✅ Votre proposition a bien été envoyée ! Redirection en cours...
+    </div>
+  } @else {
+    <div class="form-card">
+
+      @if (error) {
+        <div class="error">⚠️ {{ error }}</div>
+      }
+
+      <div class="form-group">
+        <label>Titre du jeu *</label>
+        <input type="text" [(ngModel)]="game.title" placeholder="Ex: Catan, Pandemic..." />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="game.description" placeholder="Décrivez le jeu..." rows="4"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Genre</label>
+        <input type="text" [(ngModel)]="game.genre" placeholder="Ex: Stratégie, Coopératif, Famille..." />
+      </div>
+
+      <div class="form-group">
+        <label>URL de l'image</label>
+        <input type="text" [(ngModel)]="game.imageUrl" placeholder="https://..." />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Joueurs min</label>
+          <input type="number" [(ngModel)]="game.minPlayers" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Joueurs max</label>
+          <input type="number" [(ngModel)]="game.maxPlayers" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Année</label>
+          <input type="number" [(ngModel)]="game.year" min="1900" />
+        </div>
+      </div>
+
+      <button (click)="propose()" class="btn-submit">Envoyer la proposition</button>
+    </div>
+  }
+</div>

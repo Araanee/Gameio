@@ -1,0 +1,30 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1>🎲 GameBoard</h1>
+    <h2>Connexion</h2>
+
+    @if (error) { <div class="error-msg">{{ error }}</div> }
+
+    <div class="form-group">
+      <label>Identifiant</label>
+      <input type="text" [(ngModel)]="username" placeholder="user / editor / admin" (keyup.enter)="login()" />
+    </div>
+
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" [(ngModel)]="password" placeholder="Mot de passe" (keyup.enter)="login()" />
+    </div>
+
+    <button (click)="login()" class="btn-login" [disabled]="loading">
+      {{ loading ? 'Connexion...' : 'Se connecter' }}
+    </button>
+
+    <p class="back-link">Pas encore de compte ? <a routerLink="/register">S'inscrire</a></p>
+    <p class="back-link"><a routerLink="/">← Retour sans connexion</a></p>
+
+    <div class="hint">
+      <p><strong>Comptes disponibles :</strong></p>
+      <p>👤 user / user &nbsp;|&nbsp; ✏️ editor / editor &nbsp;|&nbsp; 🛡️ admin / admin</p>
+    </div>
+  </div>
+</div>

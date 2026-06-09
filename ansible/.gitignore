@@ -1,0 +1,5 @@
+# Inventaire rempli avec une IP réelle (garder seulement .example)
+inventory.ini
+# Clés SSH — ne JAMAIS committer
+*.pem
+*.key

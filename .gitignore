@@ -1,0 +1,32 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Spring Boot
+*.log
+# Surcharges locales optionnelles (non versionnées)
+application-local-overrides.properties
+
+# Node / Angular
+node_modules/
+dist/
+
+# Cypress
+frontend/cypress/screenshots/
+frontend/cypress/videos/
+frontend/cypress/downloads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+.envbackend/src/main/resources/application-local.properties

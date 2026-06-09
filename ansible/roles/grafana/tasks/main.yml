@@ -1,0 +1,5 @@
+---
+# Rôle : Grafana (placeholder — étoffé au palier monitoring).
+- name: Placeholder grafana
+  ansible.builtin.debug:
+    msg: "TODO: installer Grafana + datasource CloudWatch + dashboards"

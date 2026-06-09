@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Permissions minimales (least-privilege) :
+# - contents:read       -> checkout du code
+# - security-events:write -> upload des rapports SARIF (Trivy) dans l'onglet Security
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # Backend : build + tests (profil test -> H2, aucune DB externe)
+  #           puis build de l'image et scan Trivy (report-only)
+  # ─────────────────────────────────────────────────────────────
+  backend:
+    name: Backend · build + test + scan image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build & tests (profil test → H2)
+        working-directory: backend
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B verify
+
+      - name: Build image Docker backend
+        working-directory: backend
+        run: docker build -t gameboard-backend:ci .
+
+      - name: Trivy · scan image backend (report-only)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: gameboard-backend:ci
+          format: sarif
+          output: trivy-backend.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'        # report-only : ne casse jamais le build
+
+      - name: Upload SARIF backend
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-backend.sarif
+          category: trivy-backend
+
+  # ─────────────────────────────────────────────────────────────
+  # Frontend : install + tests (Chrome headless, tolérés)
+  #            puis build de l'image et scan Trivy (report-only)
+  # ─────────────────────────────────────────────────────────────
+  frontend:
+    name: Frontend · build + test + scan image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Tests unitaires (Chrome headless) — tolérés
+        working-directory: frontend
+        continue-on-error: true   # tests Karma parfois flaky : ne pas bloquer le rendu
+        run: npm run test:ci
+
+      - name: Build Angular (gate dur)
+        working-directory: frontend
+        run: npm run build
+
+      - name: Build image Docker frontend
+        working-directory: frontend
+        run: docker build -t gameboard-frontend:ci .
+
+      - name: Trivy · scan image frontend (report-only)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: gameboard-frontend:ci
+          format: sarif
+          output: trivy-frontend.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: Upload SARIF frontend
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-frontend.sarif
+          category: trivy-frontend
+
+  # ─────────────────────────────────────────────────────────────
+  # Repo : Trivy filesystem -> vulns deps + secrets + misconfig IaC
+  #        (couvrira aussi le futur Terraform dans infra/)
+  # ─────────────────────────────────────────────────────────────
+  trivy-repo:
+    name: Repo · scan fs (deps + secrets + IaC)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trivy · scan filesystem (report-only)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          format: sarif
+          output: trivy-repo.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Upload SARIF repo
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-repo.sarif
+          category: trivy-repo

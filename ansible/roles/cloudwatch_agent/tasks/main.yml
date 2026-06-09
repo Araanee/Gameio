@@ -1,0 +1,5 @@
+---
+# Rôle : agent CloudWatch (placeholder — étoffé au palier monitoring).
+- name: Placeholder cloudwatch_agent
+  ansible.builtin.debug:
+    msg: "TODO: installer et configurer l'agent CloudWatch"

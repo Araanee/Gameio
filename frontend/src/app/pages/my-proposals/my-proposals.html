@@ -1,0 +1,65 @@
+@if (gameToDelete) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-icon">🗑️</div>
+      <h3>Supprimer cette proposition ?</h3>
+      <p>Voulez-vous vraiment supprimer <strong>{{ gameToDelete.title }}</strong> ?</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button class="btn-delete" (click)="deleteGame()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="container">
+  <a routerLink="/" class="btn-back">← Retour</a>
+  <h1>Mes propositions</h1>
+
+  @if (message) { <div class="msg">{{ message }}</div> }
+  @if (loading) { <p>Chargement...</p> }
+
+  @if (!loading && proposals.length === 0) {
+    <p class="empty">Vous n'avez encore proposé aucun jeu.</p>
+  }
+
+  <div class="proposal-list">
+    @for (game of proposals; track game.id) {
+      @if (editingGame?.id === game.id) {
+        <div class="proposal-row edit-row">
+          <div class="edit-form">
+            <input [(ngModel)]="editingGame!.title" placeholder="Titre" />
+            <input [(ngModel)]="editingGame!.genre" placeholder="Genre" />
+            <input [(ngModel)]="editingGame!.year" type="number" placeholder="Année" />
+            <input [(ngModel)]="editingGame!.minPlayers" type="number" placeholder="Joueurs min" />
+            <input [(ngModel)]="editingGame!.maxPlayers" type="number" placeholder="Joueurs max" />
+            <input [(ngModel)]="editingGame!.imageUrl" placeholder="URL image" />
+            <textarea [(ngModel)]="editingGame!.description" placeholder="Description" rows="2"></textarea>
+          </div>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveEdit()">💾 Sauvegarder</button>
+            <button class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+          </div>
+        </div>
+      } @else {
+        <div class="proposal-row">
+          <img [src]="game.imageUrl || 'assets/placeholder.png'" [alt]="game.title" />
+          <div class="proposal-info">
+            <h2>{{ game.title }}</h2>
+            <p>📅 {{ game.year }} &nbsp; 👥 {{ game.minPlayers }}–{{ game.maxPlayers }} joueurs</p>
+            <p class="desc">{{ game.description }}</p>
+          </div>
+          <div class="right">
+            <div class="status-badge" [class]="'badge-' + (game.status ?? 'PENDING').toLowerCase()">
+              {{ statusLabel(game.status) }}
+            </div>
+            @if (game.status === 'PENDING') {
+              <button class="btn-edit" (click)="startEdit(game)">✏️ Modifier</button>
+              <button class="btn-delete" (click)="confirmDelete(game)">🗑️ Supprimer</button>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

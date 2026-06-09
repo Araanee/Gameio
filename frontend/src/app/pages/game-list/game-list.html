@@ -1,0 +1,93 @@
+<div class="hero">
+  <div class="hero-inner">
+    <h1>GameBoard</h1>
+    <p class="subtitle">Découvrez et notez les meilleurs jeux de société</p>
+    <div class="search-bar">
+      <input type="text" [(ngModel)]="searchTitle" placeholder="🔍  Titre du jeu..." (keyup.enter)="search()" />
+      <input type="text" [(ngModel)]="searchGenre" placeholder="🎭  Genre..." (keyup.enter)="search()" />
+      <input type="number" [(ngModel)]="searchYear" placeholder="📅  Année..." (keyup.enter)="search()" />
+      <input type="number" [(ngModel)]="searchPlayers" placeholder="👥  Nb joueurs..." (keyup.enter)="search()" min="1" max="20" />
+      <button (click)="search()">Rechercher</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="top-bar">
+    @if (!loading && totalElements > 0) {
+      <p class="results-count">{{ totalElements }} jeu{{ totalElements > 1 ? 'x' : '' }} trouvé{{ totalElements > 1 ? 's' : '' }}</p>
+    } @else {
+      <p></p>
+    }
+    <div class="top-bar-right">
+      <div class="sort-controls">
+        <select [(ngModel)]="sortBy" (change)="search()">
+          <option value="title">Titre</option>
+          <option value="averageRating">Note</option>
+          <option value="year">Année</option>
+        </select>
+        <button class="btn-direction" (click)="direction = direction === 'asc' ? 'desc' : 'asc'; search()">
+          {{ direction === 'asc' ? '↑' : '↓' }}
+        </button>
+      </div>
+      @if (authService.hasRoleOrHigher('EDITOR')) {
+        <a routerLink="/propose" class="btn-propose">+ Proposer un jeu</a>
+      }
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement...</p>
+    </div>
+  }
+
+  <div class="game-grid">
+    @for (game of games; track game.id) {
+      <div class="game-card">
+        <div class="card-image">
+          <img [src]="game.imageUrl || 'assets/placeholder.png'" [alt]="game.title" />
+          @if (game.genre) {
+            <span class="genre-badge">{{ game.genre }}</span>
+          }
+        </div>
+        <div class="game-info">
+          <h2>{{ game.title }}</h2>
+          <div class="game-meta">
+            <span>📅 {{ game.year }}</span>
+            <span>👥 {{ game.minPlayers }}–{{ game.maxPlayers }}</span>
+          </div>
+          <div class="game-rating">
+            <span class="star">★</span>
+            <span class="rating-value">{{ game.averageRating | number:'1.1-1' }}</span>
+            <span class="rating-max">/ 5</span>
+          </div>
+          <a [routerLink]="['/games', game.id]" class="btn-detail">Voir la fiche →</a>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (!loading && games.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🎭</div>
+      <h3>Aucun jeu trouvé</h3>
+      <p>Essayez avec d'autres critères de recherche.</p>
+    </div>
+  }
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">‹</button>
+      @for (p of visiblePages; track p) {
+        @if (p === -1) {
+          <span class="pagination-ellipsis">…</span>
+        } @else {
+          <button (click)="goToPage(p)" [class.active]="p === currentPage">{{ p + 1 }}</button>
+        }
+      }
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">›</button>
+    </div>
+  }
+</div>

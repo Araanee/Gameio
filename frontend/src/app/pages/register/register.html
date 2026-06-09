@@ -1,0 +1,32 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1>🎲 GameBoard</h1>
+    <h2>Créer un compte</h2>
+
+    @if (error) { <div class="error-msg">{{ error }}</div> }
+
+    <div class="form-group">
+      <label>Nom d'utilisateur</label>
+      <input type="text" [(ngModel)]="username" placeholder="Choisissez un identifiant" (keyup.enter)="register()" />
+    </div>
+
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" [(ngModel)]="password" placeholder="Minimum 4 caractères" (keyup.enter)="register()" />
+    </div>
+
+    <div class="form-group">
+      <label>Confirmer le mot de passe</label>
+      <input type="password" [(ngModel)]="confirmPassword" placeholder="Répétez votre mot de passe" (keyup.enter)="register()" />
+    </div>
+
+    <button (click)="register()" class="btn-login" [disabled]="loading">
+      {{ loading ? 'Création du compte...' : 'S\'inscrire' }}
+    </button>
+
+    <p class="back-link">
+      Déjà un compte ? <a routerLink="/login">Se connecter</a>
+    </p>
+    <p class="back-link"><a routerLink="/">← Retour sans connexion</a></p>
+  </div>
+</div>

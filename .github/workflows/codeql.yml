@@ -1,0 +1,56 @@
+name: CodeQL (SAST)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Analyse hebdomadaire (lundi 6h UTC) pour attraper les nouvelles CVE de règles
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+  security-events: write   # publication des alertes dans l'onglet Security
+
+jobs:
+  analyze:
+    name: Analyse · ${{ matrix.language }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual      # pom.xml dans backend/ -> build explicite
+          - language: javascript-typescript
+            build-mode: none        # analyse statique directe, pas de build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        if: matrix.language == 'java-kotlin'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Build manuel (Java)
+        if: matrix.language == 'java-kotlin'
+        working-directory: backend
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B clean package -DskipTests
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
