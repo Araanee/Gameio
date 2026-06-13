@@ -24,3 +24,13 @@ output "rds_address" {
   description = "Hostname RDS (pour SPRING_DATASOURCE_URL)."
   value       = module.rds.address
 }
+
+output "alb_dns_name" {
+  description = "DNS public de l'ALB — point d'entrée de l'API."
+  value       = module.ecs.alb_dns_name
+}
+
+output "ecr_repository_url" {
+  description = "URL ECR où pousser l'image backend."
+  value       = module.ecs.ecr_repository_url
+}

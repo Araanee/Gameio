@@ -68,13 +68,31 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# ─── Route table PRIVÉE : aucune route Internet pour l'instant ─
-# TODO (palier ECS) : ajouter une route 0.0.0.0/0 -> NAT Gateway
-# pour permettre à Fargate de sortir (pull images ECR/DockerHub).
-# Différé volontairement = pas de coût NAT tant que le réseau est vide.
+# ─── NAT Gateway : sortie Internet pour les subnets privés ─────
+# Permet à Fargate (subnets privés) de pull son image depuis ECR.
+# Un seul NAT (dans 1 AZ) partagé par les 2 subnets privés = moins cher.
+resource "aws_eip" "nat" {
+  domain = "vpc"
+  tags   = { Name = "${local.name}-nat-eip" }
+}
+
+resource "aws_nat_gateway" "this" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public[0].id # le NAT vit dans un subnet PUBLIC
+  tags          = { Name = "${local.name}-nat" }
+  depends_on    = [aws_internet_gateway.this]
+}
+
+# ─── Route table PRIVÉE : sortie 0.0.0.0/0 -> NAT ──────────────
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
   tags   = { Name = "${local.name}-rt-private" }
+}
+
+resource "aws_route" "private_nat" {
+  route_table_id         = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.this.id
 }
 
 resource "aws_route_table_association" "private" {

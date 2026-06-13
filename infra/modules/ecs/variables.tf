@@ -1,0 +1,80 @@
+variable "project" {
+  type        = string
+  description = "Nom du projet (préfixe nommage/tags)."
+}
+
+variable "environment" {
+  type        = string
+  description = "Environnement logique (dev/prod)."
+}
+
+variable "aws_region" {
+  type        = string
+  description = "Région AWS (pour la config des logs CloudWatch)."
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "ID du VPC."
+}
+
+variable "public_subnet_ids" {
+  type        = list(string)
+  description = "Subnets publics (pour l'ALB)."
+}
+
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = "Subnets privés (pour les tâches Fargate)."
+}
+
+variable "db_address" {
+  type        = string
+  description = "Hostname RDS."
+}
+
+variable "db_name" {
+  type        = string
+  description = "Nom de la base."
+}
+
+variable "db_username" {
+  type        = string
+  description = "Utilisateur de la base."
+}
+
+variable "db_password" {
+  type        = string
+  description = "Mot de passe de la base."
+  sensitive   = true
+}
+
+variable "image_tag" {
+  type        = string
+  description = "Tag de l'image backend dans ECR."
+  default     = "latest"
+}
+
+variable "desired_count" {
+  type        = number
+  description = "Nombre de tâches backend."
+  default     = 1
+}
+
+variable "container_port" {
+  type        = number
+  description = "Port exposé par le backend."
+  default     = 8080
+}
+
+variable "cpu" {
+  type        = number
+  description = "CPU Fargate (unités, 512 = 0.5 vCPU)."
+  default     = 512
+}
+
+variable "memory" {
+  type        = number
+  description = "Mémoire Fargate (Mo)."
+  default     = 1024
+}

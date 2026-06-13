@@ -16,6 +16,18 @@ variable "environment" {
   default     = "dev"
 }
 
+variable "db_name" {
+  description = "Nom de la base de données."
+  type        = string
+  default     = "gameboard"
+}
+
+variable "db_username" {
+  description = "Utilisateur maître de la base."
+  type        = string
+  default     = "gameboard"
+}
+
 variable "db_password" {
   description = "Mot de passe maître RDS. Fourni via TF_VAR_db_password — JAMAIS commité."
   type        = string

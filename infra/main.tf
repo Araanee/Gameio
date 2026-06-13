@@ -18,5 +18,23 @@ module "rds" {
   private_subnet_ids = module.vpc.private_subnet_ids
   # Pour l'instant : tout le VPC peut joindre la base. À resserrer vers le SG ECS.
   allowed_cidr_blocks = [module.vpc.vpc_cidr_block]
+  db_name             = var.db_name
+  db_username         = var.db_username
   db_password         = var.db_password
+}
+
+module "ecs" {
+  source = "./modules/ecs"
+
+  project            = var.project
+  environment        = var.environment
+  aws_region         = var.aws_region
+  vpc_id             = module.vpc.vpc_id
+  public_subnet_ids  = module.vpc.public_subnet_ids
+  private_subnet_ids = module.vpc.private_subnet_ids
+
+  db_address  = module.rds.address
+  db_name     = var.db_name
+  db_username = var.db_username
+  db_password = var.db_password
 }
