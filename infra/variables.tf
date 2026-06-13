@@ -15,3 +15,9 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
+
+variable "db_password" {
+  description = "Mot de passe maître RDS. Fourni via TF_VAR_db_password — JAMAIS commité."
+  type        = string
+  sensitive   = true
+}

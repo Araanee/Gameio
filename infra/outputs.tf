@@ -14,3 +14,13 @@ output "private_subnet_ids" {
   description = "Subnets privés (ECS, RDS)."
   value       = module.vpc.private_subnet_ids
 }
+
+output "rds_endpoint" {
+  description = "Endpoint de la base RDS (host:port)."
+  value       = module.rds.endpoint
+}
+
+output "rds_address" {
+  description = "Hostname RDS (pour SPRING_DATASOURCE_URL)."
+  value       = module.rds.address
+}
