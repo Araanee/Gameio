@@ -25,5 +25,9 @@ jobs:
           GITLAB_REPO: ${{ secrets.GITLAB_REPO }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
-          git push --force "https://oauth2:${GITLAB_TOKEN}@${GITLAB_REPO}" \
+          # Tolère un https:// collé par erreur dans le secret GITLAB_REPO
+          REPO="${GITLAB_REPO#https://}"
+          REPO="${REPO#http://}"
+          echo "Cible mirror : https://oauth2:***@${REPO}"   # host visible, token masqué
+          git push --force "https://oauth2:${GITLAB_TOKEN}@${REPO}" \
             "HEAD:refs/heads/main" --tags

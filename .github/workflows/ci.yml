@@ -42,7 +42,7 @@ jobs:
         run: docker build -t gameboard-backend:ci .
 
       - name: Trivy · scan image backend (report-only)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: gameboard-backend:ci
           format: sarif
@@ -93,7 +93,7 @@ jobs:
         run: docker build -t gameboard-frontend:ci .
 
       - name: Trivy · scan image frontend (report-only)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: gameboard-frontend:ci
           format: sarif
@@ -120,7 +120,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Trivy · scan filesystem (report-only)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
