@@ -56,11 +56,11 @@ resource "aws_security_group" "alb" {
 # ─── Security Group des tâches : 8080 depuis l'ALB UNIQUEMENT ──
 resource "aws_security_group" "ecs" {
   name        = "${local.name}-ecs-sg"
-  description = "Taches Fargate : trafic applicatif depuis l'ALB"
+  description = "Taches Fargate : trafic applicatif depuis ALB"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "Depuis l'ALB"
+    description     = "Depuis ALB"
     from_port       = var.container_port
     to_port         = var.container_port
     protocol        = "tcp"
