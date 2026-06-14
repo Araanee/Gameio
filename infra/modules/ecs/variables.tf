@@ -55,6 +55,12 @@ variable "image_tag" {
   default     = "latest"
 }
 
+variable "cors_allowed_origins" {
+  type        = string
+  description = "Origines CORS autorisées par le backend (ex. URL du site S3)."
+  default     = "http://localhost:4200"
+}
+
 variable "desired_count" {
   type        = number
   description = "Nombre de tâches backend."

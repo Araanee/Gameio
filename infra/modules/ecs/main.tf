@@ -145,7 +145,8 @@ resource "aws_ecs_task_definition" "backend" {
         { name = "SPRING_PROFILES_ACTIVE", value = "aws" },
         { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://${var.db_address}:5432/${var.db_name}" },
         { name = "SPRING_DATASOURCE_USERNAME", value = var.db_username },
-        { name = "SPRING_DATASOURCE_PASSWORD", value = var.db_password }
+        { name = "SPRING_DATASOURCE_PASSWORD", value = var.db_password },
+        { name = "APP_CORS_ALLOWED_ORIGINS", value = var.cors_allowed_origins }
       ]
       logConfiguration = {
         logDriver = "awslogs"

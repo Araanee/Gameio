@@ -23,6 +23,13 @@ module "rds" {
   db_password         = var.db_password
 }
 
+module "s3_frontend" {
+  source = "./modules/s3-frontend"
+
+  project     = var.project
+  environment = var.environment
+}
+
 module "ecs" {
   source = "./modules/ecs"
 
@@ -37,4 +44,7 @@ module "ecs" {
   db_name     = var.db_name
   db_username = var.db_username
   db_password = var.db_password
+
+  # Autorise le site S3 à appeler l'API (CORS)
+  cors_allowed_origins = module.s3_frontend.website_url
 }

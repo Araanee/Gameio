@@ -1,5 +1,6 @@
 package com.gameboard.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,6 +20,11 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    // Origines CORS autorisées, surchargeables par env (APP_CORS_ALLOWED_ORIGINS).
+    // Défaut = dev local ; en cloud, ECS injecte l'URL du site S3.
+    @Value("${app.cors.allowed-origins:http://localhost:4200,http://127.0.0.1:4200}")
+    private List<String> allowedOrigins;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -27,8 +33,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        //config.setAllowedOrigins(List.of("http://localhost:4200"));
-        config.setAllowedOrigins(List.of("http://localhost:4200", "http://127.0.0.1:4200"));
+        config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

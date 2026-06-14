@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export type Role = 'USER' | 'EDITOR' | 'WEBMASTER';
 
@@ -14,7 +15,7 @@ export interface AuthUser {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private currentUser = signal<AuthUser | null>(null);
-  private apiUrl = 'http://localhost:8080/api/auth/me';
+  private apiUrl = `${environment.apiBase}/api/auth/me`;
 
   constructor(private http: HttpClient) {}
 
@@ -55,7 +56,7 @@ export class AuthService {
   }
 
   register(username: string, password: string): Observable<{ success: boolean; error?: string }> {
-    return this.http.post<any>('http://localhost:8080/api/auth/register', { username, password }).pipe(
+    return this.http.post<any>(`${environment.apiBase}/api/auth/register`, { username, password }).pipe(
       map(() => ({ success: true })),
       catchError(err => of({ success: false, error: err.error?.error || 'Erreur lors de l\'inscription.' }))
     );

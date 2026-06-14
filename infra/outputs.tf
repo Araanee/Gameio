@@ -34,3 +34,13 @@ output "ecr_repository_url" {
   description = "URL ECR où pousser l'image backend."
   value       = module.ecs.ecr_repository_url
 }
+
+output "frontend_bucket" {
+  description = "Bucket S3 du frontend (pour aws s3 sync)."
+  value       = module.s3_frontend.bucket_name
+}
+
+output "frontend_url" {
+  description = "URL publique du frontend (site statique S3)."
+  value       = module.s3_frontend.website_url
+}
