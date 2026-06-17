@@ -3,5 +3,5 @@
 // puis remplace la valeur ci-dessous (garde le http:// et PAS de slash final).
 export const environment = {
   production: true,
-  apiBase: 'http://REMPLACE-PAR-TON-ALB-DNS',
+  apiBase: 'http://gameboard-dev-alb-1689153151.us-east-1.elb.amazonaws.com',
 };
