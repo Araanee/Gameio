@@ -1,5 +1,33 @@
 ---
-# Rôle : agent CloudWatch (placeholder — étoffé au palier monitoring).
-- name: Placeholder cloudwatch_agent
-  ansible.builtin.debug:
-    msg: "TODO: installer et configurer l'agent CloudWatch"
+# Installe et configure l'agent CloudWatch (métriques système -> CloudWatch).
+- name: Installer l'agent CloudWatch
+  ansible.builtin.dnf:
+    name: amazon-cloudwatch-agent
+    state: present
+
+- name: Déposer la configuration de l'agent
+  ansible.builtin.copy:
+    dest: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+    mode: "0644"
+    content: |
+      {
+        "agent": { "metrics_collection_interval": 60 },
+        "metrics": {
+          "namespace": "GameBoard/EC2",
+          "metrics_collected": {
+            "cpu": { "measurement": ["usage_active"], "totalcpu": true },
+            "mem": { "measurement": ["mem_used_percent"] },
+            "disk": { "measurement": ["used_percent"], "resources": ["/"] }
+          }
+        }
+      }
+  register: cw_config
+
+- name: Appliquer la config et (re)démarrer l'agent
+  ansible.builtin.command:
+    cmd: >
+      /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl
+      -a fetch-config -m ec2 -s
+      -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+  when: cw_config.changed
+  changed_when: true

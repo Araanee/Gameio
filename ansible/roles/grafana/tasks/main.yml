@@ -1,5 +1,35 @@
 ---
-# Rôle : Grafana (placeholder — étoffé au palier monitoring).
-- name: Placeholder grafana
-  ansible.builtin.debug:
-    msg: "TODO: installer Grafana + datasource CloudWatch + dashboards"
+# Installe Grafana et provisionne une datasource CloudWatch (auth via le rôle EC2).
+- name: Ajouter le dépôt YUM Grafana
+  ansible.builtin.yum_repository:
+    name: grafana
+    description: Grafana OSS
+    baseurl: https://rpm.grafana.com
+    gpgcheck: true
+    gpgkey: https://rpm.grafana.com/gpg.key
+    enabled: true
+
+- name: Installer Grafana
+  ansible.builtin.dnf:
+    name: grafana
+    state: present
+
+- name: Provisionner la datasource CloudWatch
+  ansible.builtin.copy:
+    dest: /etc/grafana/provisioning/datasources/cloudwatch.yaml
+    mode: "0644"
+    content: |
+      apiVersion: 1
+      datasources:
+        - name: CloudWatch
+          type: cloudwatch
+          jsonData:
+            authType: default        # utilise le rôle IAM de l'EC2 (LabRole)
+            defaultRegion: us-east-1
+  notify: Restart grafana
+
+- name: Activer et démarrer Grafana
+  ansible.builtin.systemd:
+    name: grafana-server
+    enabled: true
+    state: started

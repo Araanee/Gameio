@@ -44,3 +44,13 @@ output "frontend_url" {
   description = "URL publique du frontend (site statique S3)."
   value       = module.s3_frontend.website_url
 }
+
+output "monitoring_public_ip" {
+  description = "IP publique de l'EC2 monitoring (pour l'inventaire Ansible)."
+  value       = module.monitoring.public_ip
+}
+
+output "grafana_url" {
+  description = "URL de Grafana."
+  value       = module.monitoring.grafana_url
+}

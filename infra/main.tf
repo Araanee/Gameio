@@ -48,3 +48,12 @@ module "ecs" {
   # Autorise le site S3 à appeler l'API (CORS)
   cors_allowed_origins = module.s3_frontend.website_url
 }
+
+module "monitoring" {
+  source = "./modules/monitoring"
+
+  project          = var.project
+  environment      = var.environment
+  vpc_id           = module.vpc.vpc_id
+  public_subnet_id = module.vpc.public_subnet_ids[0]
+}
