@@ -1,9 +1,38 @@
 ---
 # Provisionne l'EC2 monitoring : agent CloudWatch + Grafana.
-# Squelette J-plus-tard — les rôles seront étoffés au palier monitoring.
 - name: Configurer l'EC2 monitoring
   hosts: monitoring
   become: true
+
+  pre_tasks:
+    # t3.micro = 1 Go de RAM -> dnf (Grafana) se fait tuer par l'OOM killer.
+    # 2 Go de swap évitent ça. Bloc idempotent : ne s'exécute que si pas déjà actif.
+    - name: Vérifier l'état du swap
+      ansible.builtin.command: swapon --show
+      register: swap_status
+      changed_when: false
+
+    - name: Configurer 2 Go de swap (anti-OOM)
+      when: "'/swapfile' not in swap_status.stdout"
+      block:
+        - name: Allouer le fichier de swap
+          ansible.builtin.command:
+            cmd: fallocate -l 2G /swapfile
+            creates: /swapfile
+
+        - name: Sécuriser le fichier de swap
+          ansible.builtin.file:
+            path: /swapfile
+            owner: root
+            group: root
+            mode: "0600"
+
+        - name: Formater en swap
+          ansible.builtin.command: mkswap /swapfile
+
+        - name: Activer le swap
+          ansible.builtin.command: swapon /swapfile
+
   roles:
     - cloudwatch_agent
     - grafana
