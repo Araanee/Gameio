@@ -63,8 +63,26 @@ variable "cors_allowed_origins" {
 
 variable "desired_count" {
   type        = number
-  description = "Nombre de tâches backend."
-  default     = 1
+  description = "Nombre de tâches backend au démarrage (baseline)."
+  default     = 2
+}
+
+variable "min_capacity" {
+  type        = number
+  description = "Nombre minimum de tâches (autoscaling)."
+  default     = 2
+}
+
+variable "max_capacity" {
+  type        = number
+  description = "Nombre maximum de tâches (autoscaling)."
+  default     = 4
+}
+
+variable "cpu_target_value" {
+  type        = number
+  description = "Cible d'utilisation CPU moyenne (%) pour l'autoscaling."
+  default     = 60
 }
 
 variable "container_port" {

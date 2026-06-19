@@ -186,5 +186,36 @@ resource "aws_ecs_service" "backend" {
 
   depends_on = [aws_lb_listener.http]
 
+  # L'autoscaler pilote desired_count : Terraform ne doit pas le réinitialiser.
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+
   tags = { Name = "${local.name}-backend" }
+}
+
+# ─── Autoscaling : ajuste le nombre de tâches selon la charge CPU ──
+resource "aws_appautoscaling_target" "ecs" {
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.this.name}/${aws_ecs_service.backend.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  min_capacity       = var.min_capacity
+  max_capacity       = var.max_capacity
+}
+
+resource "aws_appautoscaling_policy" "cpu" {
+  name               = "${local.name}-cpu-target"
+  policy_type        = "TargetTrackingScaling"
+  service_namespace  = aws_appautoscaling_target.ecs.service_namespace
+  resource_id        = aws_appautoscaling_target.ecs.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value       = var.cpu_target_value
+    scale_in_cooldown  = 60
+    scale_out_cooldown = 60
+  }
 }

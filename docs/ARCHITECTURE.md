@@ -70,7 +70,7 @@ Déploiement sur **AWS Academy Learner Lab**, qui impose des limites structurant
 ## 5. Backend conteneurisé (module `ecs`)
 
 - **ECR** : registre privé de l'image backend (scan de vulnérabilités on-push).
-- **ECS Fargate** : cluster + task definition + service (1 tâche) dans les **subnets privés**.
+- **ECS Fargate** : cluster + task definition + service dans les **subnets privés**. **2 tâches réparties sur les 2 AZ** (résilience) avec **autoscaling** (target tracking CPU 60 %, 2→4 tâches) → scalabilité automatique sous charge.
 - **ALB** (public) → **target group :8080** → tâches Fargate. Health check sur `/actuator/health`.
 - Rôles d'exécution/tâche = **`LabRole`** (contrainte Learner Lab).
 - Logs conteneur → **CloudWatch** (`/ecs/gameboard-dev-backend`).
@@ -123,7 +123,8 @@ L'app utilise Kafka en local (events `game-imported`). En cloud, le profil `aws`
 |---|---|
 | `LabRole` partout | IAM custom interdit en Learner Lab |
 | NAT Gateway unique | Coût (vs 1 NAT/AZ) |
-| RDS single-AZ | Coût + périmètre démo |
+| ECS : 2 tâches + autoscaling CPU | Résilience (2 AZ) + scalabilité automatique |
+| RDS single-AZ | Coût + périmètre démo (évolution possible : multi-AZ) |
 | Kafka retiré du cloud | Pas de valeur en prod démo, simplifie l'infra |
 | Frontend S3 + HTTP | Architecture imposée ; HTTPS = bonus CloudFront |
 | Trivy en report-only | Ne pas bloquer le rendu ; visibilité via SARIF |
